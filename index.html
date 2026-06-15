@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NoctuaDB Studio — Database GUI for every engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05050f;
+  --bg2: #0a0a1a;
+  --surface: #0f0f24;
+  --surface2: #161630;
+  --border: rgba(100,100,200,0.15);
+  --accent: #7c6af7;
+  --accent2: #a78bfa;
+  --accent3: #38bdf8;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --radius: 12px;
+  --radius-lg: 20px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* ─── STARS ─────────────────────────────────────────────── */
+#stars-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ─── NAV ────────────────────────────────────────────────── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5%;
+  height: 68px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(5,5,15,0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: background 0.3s;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.nav-logo svg { width: 32px; height: 32px; }
+
+.nav-logo-text {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.nav-logo-text span { color: var(--accent2); }
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--text2);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--text); }
+
+.nav-cta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(124,106,247,0.35);
+}
+
+.btn-primary:hover {
+  background: var(--accent2);
+  box-shadow: 0 0 32px rgba(124,106,247,0.55);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+
+.btn-ghost:hover { color: var(--text); border-color: rgba(124,106,247,0.4); }
+
+/* ─── HERO ───────────────────────────────────────────────── */
+#hero {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 120px 5% 80px;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(124,106,247,0.12);
+  border: 1px solid rgba(124,106,247,0.3);
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent2);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+
+.hero-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--accent2);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.hero-title {
+  font-size: clamp(2.8rem, 6vw, 5.5rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  max-width: 900px;
+  margin-bottom: 24px;
+}
+
+.hero-title .grad {
+  background: linear-gradient(135deg, #a78bfa 0%, #38bdf8 60%, #a78bfa 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+@keyframes shimmer {
+  to { background-position: 200% center; }
+}
+
+.hero-sub {
+  font-size: 1.15rem;
+  color: var(--text2);
+  max-width: 560px;
+  margin-bottom: 40px;
+  font-weight: 400;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 72px;
+}
+
+.hero-screenshot {
+  width: 100%;
+  max-width: 1100px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(124,106,247,0.1),
+    0 40px 80px rgba(0,0,0,0.6),
+    0 0 120px rgba(124,106,247,0.08);
+  position: relative;
+}
+
+.screenshot-bar {
+  background: var(--surface);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.dot { width: 12px; height: 12px; border-radius: 50%; }
+.dot-r { background: #ff5f57; }
+.dot-y { background: #febc2e; }
+.dot-g { background: #28c840; }
+
+.screenshot-url {
+  flex: 1;
+  background: var(--bg2);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text3);
+  text-align: center;
+  margin: 0 12px;
+}
+
+.screenshot-body {
+  background: var(--bg2);
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: 420px;
+}
+
+.ss-sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 16px 0;
+}
+
+.ss-sidebar-item {
+  padding: 8px 16px;
+  font-size: 0.78rem;
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: default;
+}
+
+.ss-sidebar-item.active {
+  background: rgba(124,106,247,0.1);
+  color: var(--accent2);
+}
+
+.ss-sidebar-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+.ss-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ss-tab-bar {
+  display: flex;
+  gap: 2px;
+  background: var(--surface);
+  padding: 4px;
+  border-radius: 8px;
+  width: fit-content;
+}
+
+.ss-tab {
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: var(--text3);
+}
+
+.ss-tab.active {
+  background: var(--bg);
+  color: var(--text2);
+  font-weight: 500;
+}
+
+.ss-query-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  line-height: 1.7;
+}
+
+.kw { color: #c792ea; }
+.fn { color: #82aaff; }
+.str { color: #c3e88d; }
+.num { color: #f78c6c; }
+.cm { color: var(--text3); }
+
+.ss-table { border-collapse: collapse; width: 100%; font-size: 0.78rem; }
+.ss-table th {
+  background: var(--surface);
+  color: var(--text3);
+  font-weight: 600;
+  padding: 8px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 0.04em;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.ss-table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid rgba(100,100,200,0.07);
+  color: var(--text2);
+}
+
+.ss-table tr:hover td { background: rgba(124,106,247,0.04); }
+
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.tag-green { background: rgba(34,197,94,0.15); color: #4ade80; }
+.tag-blue { background: rgba(56,189,248,0.15); color: #38bdf8; }
+.tag-purple { background: rgba(124,106,247,0.15); color: #a78bfa; }
+
+/* ─── DATABASES ──────────────────────────────────────────── */
+#databases {
+  position: relative;
+  z-index: 1;
+  padding: 100px 5%;
+  text-align: center;
+}
+
+.section-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 16px;
+  line-height: 1.15;
+}
+
+.section-sub {
+  color: var(--text2);
+  font-size: 1rem;
+  max-width: 520px;
+  margin: 0 auto 60px;
+}
+
+.db-grid {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.db-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 28px 36px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  min-width: 140px;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.db-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.db-card:hover {
+  border-color: rgba(124,106,247,0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 40px rgba(124,106,247,0.07);
+}
+
+.db-card:hover::before { opacity: 1; }
+
+.db-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+}
+
+.db-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text2);
+}
+
+/* DB icon backgrounds */
+.db-mysql .db-icon { background: rgba(0,119,170,0.18); }
+.db-postgres .db-icon { background: rgba(49,99,140,0.18); }
+.db-sqlite .db-icon { background: rgba(68,121,161,0.18); }
+.db-mongo .db-icon { background: rgba(0,104,62,0.18); }
+.db-redis .db-icon { background: rgba(220,60,40,0.18); }
+
+/* ─── FEATURES ───────────────────────────────────────────── */
+#features-zone {
+  position: relative;
+  z-index: 1;
+}
+
+#features {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 84px 5% 24px;
+  z-index: 1;
+}
+
+.features-header {
+  text-align: center;
+  margin-bottom: 32px;
+  flex-shrink: 0;
+}
+
+.features-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+  align-items: start;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.features-list-wrap {
+  /* no longer needs inner sticky — whole section is sticky */
+}
+
+.features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.25s;
+  border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-item::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--accent);
+  transform: scaleY(0);
+  transition: transform 0.25s;
+  border-radius: 0 2px 2px 0;
+}
+
+.feature-item.active {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+.feature-item.active::before { transform: scaleY(1); }
+
+.feature-item-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  transition: background 0.25s;
+}
+
+.feature-item.active .feature-item-icon {
+  background: rgba(124,106,247,0.2);
+}
+
+.feature-item-text { flex: 1; }
+
+.feature-item-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text2);
+  transition: color 0.25s;
+  line-height: 1.3;
+  margin-bottom: 3px;
+}
+
+.feature-item.active .feature-item-title { color: var(--text); }
+
+.feature-item-desc {
+  font-size: 0.78rem;
+  color: var(--text3);
+  line-height: 1.5;
+}
+
+/* Feature panels */
+.features-panels { overflow: hidden; }
+.features-panels { }
+
+.feature-panel {
+  display: none;
+  animation: fadeSlideIn 0.35s ease;
+}
+
+.feature-panel.active { display: block; }
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.feature-panel-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 10px;
+}
+
+.feature-panel-desc {
+  color: var(--text2);
+  font-size: 0.95rem;
+  margin-bottom: 28px;
+  max-width: 540px;
+}
+
+/* Carousel */
+.carousel {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.carousel-slide {
+  min-width: 100%;
+}
+
+.carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.carousel-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.carousel-dot.active {
+  background: var(--accent);
+  width: 20px;
+  border-radius: 3px;
+}
+
+.carousel-btn {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  font-size: 1rem;
+}
+
+.carousel-btn:hover { background: var(--surface2); color: var(--text); }
+
+/* Mock screenshots for each feature */
+.mock {
+  background: var(--bg2);
+  height: 340px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mock-bar {
+  background: var(--surface);
+  padding: 12px 16px;
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.mock-body { flex: 1; padding: 20px; overflow: hidden; }
+
+.mock-editor {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  line-height: 1.8;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.mock-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.mock-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+}
+
+.mock-row-num {
+  color: var(--text3);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  min-width: 24px;
+}
+
+.mock-col-header {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding: 8px 14px;
+  font-size: 0.7rem;
+  color: var(--text3);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.mock-data-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding: 9px 14px;
+  font-size: 0.78rem;
+  color: var(--text2);
+  border-radius: 6px;
+}
+
+.mock-data-row:hover { background: var(--surface); }
+
+.mock-schema {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.schema-table {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.schema-table-header {
+  background: rgba(124,106,247,0.1);
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.schema-col {
+  padding: 7px 14px;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(100,100,200,0.06);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.schema-col:last-child { border-bottom: none; }
+
+.col-type { color: var(--text3); font-size: 0.7rem; }
+
+.col-pk {
+  background: rgba(124,106,247,0.2);
+  color: var(--accent2);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.col-fk {
+  background: rgba(56,189,248,0.15);
+  color: var(--accent3);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+/* Connection manager mock */
+.conn-list { display: flex; flex-direction: column; gap: 8px; }
+
+.conn-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 0.82rem;
+}
+
+.conn-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.conn-dot.online { background: #4ade80; box-shadow: 0 0 8px #4ade80; }
+.conn-dot.offline { background: var(--text3); }
+
+.conn-info { flex: 1; }
+.conn-name { font-weight: 600; color: var(--text); }
+.conn-host { font-size: 0.72rem; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+.conn-badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; font-weight: 600; }
+
+/* ─── DOWNLOAD ───────────────────────────────────────────── */
+#download {
+  position: relative;
+  z-index: 1;
+  padding: 120px 5%;
+  text-align: center;
+}
+
+.download-card {
+  max-width: 760px;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 64px 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.download-card::before {
+  content: '';
+  position: absolute;
+  top: -80px; left: 50%;
+  transform: translateX(-50%);
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(124,106,247,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.download-title { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 12px; }
+.download-sub { color: var(--text2); font-size: 0.95rem; margin-bottom: 48px; }
+
+.download-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.dl-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 20px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+
+.dl-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: linear-gradient(135deg, rgba(124,106,247,0.06), rgba(56,189,248,0.06));
+  transition: opacity 0.25s;
+}
+
+.dl-btn:hover {
+  border-color: rgba(124,106,247,0.35);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+}
+
+.dl-btn:hover::after { opacity: 1; }
+
+.dl-icon { font-size: 2.2rem; position: relative; z-index: 1; }
+.dl-os { font-size: 0.85rem; font-weight: 700; position: relative; z-index: 1; }
+.dl-note { font-size: 0.7rem; color: var(--text3); position: relative; z-index: 1; }
+
+.dl-release-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 28px;
+  font-size: 0.82rem;
+  color: var(--text3);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.dl-release-link:hover { color: var(--accent2); }
+
+/* ─── FOOTER ─────────────────────────────────────────────── */
+footer {
+  position: relative;
+  z-index: 1;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 80px 5% 48px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px;
+  max-width: 1200px;
+  margin: 0 auto 60px;
+}
+
+.footer-brand .nav-logo { margin-bottom: 16px; }
+
+.footer-brand p {
+  font-size: 0.875rem;
+  color: var(--text3);
+  max-width: 280px;
+  line-height: 1.7;
+}
+
+.footer-socials {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.footer-social-btn {
+  width: 36px; height: 36px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text3);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.footer-social-btn:hover { color: var(--text); border-color: var(--accent); }
+
+.footer-col h4 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text2);
+  margin-bottom: 20px;
+}
+
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+
+.footer-col ul a {
+  text-decoration: none;
+  font-size: 0.875rem;
+  color: var(--text3);
+  transition: color 0.2s;
+}
+
+.footer-col ul a:hover { color: var(--text); }
+
+.footer-bottom {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-bottom-left {
+  font-size: 0.8rem;
+  color: var(--text3);
+}
+
+.footer-bottom-left span { color: var(--accent2); }
+
+.footer-bottom-right {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-bottom-right a {
+  font-size: 0.8rem;
+  color: var(--text3);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-bottom-right a:hover { color: var(--text); }
+
+/* ─── DIVIDERS ───────────────────────────────────────────── */
+.divider {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border), transparent);
+}
+
+/* ─── SCROLL OBSERVER (js-controlled) ───────────────────── */
+.observe-feature { min-height: 100vh; display: flex; align-items: center; }
+
+/* ─── RESPONSIVE ─────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  .features-layout { grid-template-columns: 1fr; }
+  .features-list-wrap { position: static; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .download-grid { grid-template-columns: 1fr; max-width: 260px; margin: 0 auto; }
+  .screenshot-body { grid-template-columns: 1fr; }
+  .ss-sidebar { display: none; }
+}
+
+@media (max-width: 600px) {
+  .footer-grid { grid-template-columns: 1fr; }
+  .download-card { padding: 40px 24px; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <!-- Owl SVG logo -->
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="16" cy="16" r="15" fill="rgba(124,106,247,0.15)" stroke="rgba(124,106,247,0.4)" stroke-width="1"/>
+      <ellipse cx="12" cy="15" rx="4" ry="4.5" fill="rgba(124,106,247,0.3)"/>
+      <ellipse cx="20" cy="15" rx="4" ry="4.5" fill="rgba(124,106,247,0.3)"/>
+      <circle cx="12" cy="15" r="2.5" fill="#a78bfa"/>
+      <circle cx="20" cy="15" r="2.5" fill="#a78bfa"/>
+      <circle cx="12.8" cy="14.2" r="0.9" fill="#fff"/>
+      <circle cx="20.8" cy="14.2" r="0.9" fill="#fff"/>
+      <path d="M14 21 Q16 23 18 21" stroke="#a78bfa" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+      <path d="M8 10 Q10 7 12 10" stroke="rgba(124,106,247,0.6)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+      <path d="M20 10 Q22 7 24 10" stroke="rgba(124,106,247,0.6)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+    </svg>
+    <span class="nav-logo-text">Noctua<span>DB</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#databases">Databases</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#download">Download</a></li>
+    <li><a href="https://github.com/iuribrito/noctuadb-studio" target="_blank">GitHub</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="#download" class="btn btn-primary">Download Free</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-badge">Now in beta — free forever for individuals</div>
+  <h1 class="hero-title">
+    One GUI for<br><span class="grad">every database</span>
+  </h1>
+  <p class="hero-sub">
+    NoctuaDB Studio gives you a beautiful, fast interface to query, explore, and manage MySQL, PostgreSQL, SQLite, MongoDB, and Redis — all in one place.
+  </p>
+  <div class="hero-actions">
+    <a href="#download" class="btn btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download Now
+    </a>
+    <a href="https://github.com/iuribrito/noctuadb-studio" target="_blank" class="btn btn-ghost">View on GitHub</a>
+  </div>
+
+  <!-- Hero screenshot mockup -->
+  <div class="hero-screenshot">
+    <div class="screenshot-bar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <div class="screenshot-url">NoctuaDB Studio — localhost:5432 / production</div>
+    </div>
+    <div class="screenshot-body">
+      <div class="ss-sidebar">
+        <div class="ss-sidebar-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M20 12a8 8 0 11-16 0 8 8 0 0116 0z"/></svg>
+          production
+        </div>
+        <div class="ss-sidebar-item" style="padding-left:32px;color:var(--text3);">users</div>
+        <div class="ss-sidebar-item" style="padding-left:32px;color:var(--text3);">orders</div>
+        <div class="ss-sidebar-item" style="padding-left:32px;color:var(--text3);">products</div>
+        <div class="ss-sidebar-item" style="padding-left:32px;color:var(--text3);">sessions</div>
+        <div class="ss-sidebar-item" style="margin-top:8px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          staging
+        </div>
+      </div>
+      <div class="ss-content">
+        <div class="ss-tab-bar">
+          <div class="ss-tab active">Query</div>
+          <div class="ss-tab">Table</div>
+          <div class="ss-tab">Schema</div>
+        </div>
+        <div class="ss-query-box">
+          <span class="kw">SELECT</span> u.id, u.name, u.email,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;COUNT(o.id) <span class="kw">AS</span> total_orders<br>
+          <span class="kw">FROM</span> <span class="fn">users</span> u<br>
+          <span class="kw">LEFT JOIN</span> <span class="fn">orders</span> o <span class="kw">ON</span> o.user_id = u.id<br>
+          <span class="kw">WHERE</span> u.created_at &gt; <span class="str">'2024-01-01'</span><br>
+          <span class="kw">GROUP BY</span> u.id<br>
+          <span class="kw">ORDER BY</span> total_orders <span class="kw">DESC</span><br>
+          <span class="kw">LIMIT</span> <span class="num">50</span>;
+        </div>
+        <table class="ss-table">
+          <thead>
+            <tr>
+              <th>ID</th><th>Name</th><th>Email</th><th>Orders</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>#1042</td><td>Alice Martins</td><td>alice@example.com</td><td>87</td>
+              <td><span class="tag tag-green">Active</span></td>
+            </tr>
+            <tr>
+              <td>#983</td><td>Bruno Costa</td><td>bruno@example.com</td><td>64</td>
+              <td><span class="tag tag-green">Active</span></td>
+            </tr>
+            <tr>
+              <td>#777</td><td>Carla Silva</td><td>carla@example.com</td><td>41</td>
+              <td><span class="tag tag-blue">Trial</span></td>
+            </tr>
+            <tr>
+              <td>#512</td><td>Daniel Rocha</td><td>daniel@example.com</td><td>19</td>
+              <td><span class="tag tag-purple">New</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider" style="margin: 0 auto;"></div>
+
+<!-- DATABASES -->
+<section id="databases">
+  <div class="section-label">Compatibility</div>
+  <h2 class="section-title">Works with the databases<br>you already use</h2>
+  <p class="section-sub">Connect to any combination of engines from a single unified interface.</p>
+  <div class="db-grid">
+    <div class="db-card db-mysql">
+      <div class="db-icon">🐬</div>
+      <div class="db-name">MySQL</div>
+    </div>
+    <div class="db-card db-postgres">
+      <div class="db-icon">🐘</div>
+      <div class="db-name">PostgreSQL</div>
+    </div>
+    <div class="db-card db-sqlite">
+      <div class="db-icon">🗃️</div>
+      <div class="db-name">SQLite</div>
+    </div>
+    <div class="db-card db-mongo">
+      <div class="db-icon">🍃</div>
+      <div class="db-name">MongoDB</div>
+    </div>
+    <div class="db-card db-redis">
+      <div class="db-icon">⚡</div>
+      <div class="db-name">Redis</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FEATURES -->
+<div id="features-zone">
+<section id="features">
+  <div class="features-header">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">Everything you need,<br>nothing you don't</h2>
+    <p class="section-sub">Built for developers who want power without the bloat.</p>
+  </div>
+
+  <div class="features-layout" id="features-layout">
+    <!-- Sticky list -->
+    <div class="features-list-wrap">
+      <div class="features-list" id="feature-list">
+        <div class="feature-item active" data-feature="0">
+          <div class="feature-item-icon">✏️</div>
+          <div class="feature-item-text">
+            <div class="feature-item-title">Query Editor</div>
+            <div class="feature-item-desc">Syntax highlight, autocomplete, multi-tab</div>
+          </div>
+        </div>
+        <div class="feature-item" data-feature="1">
+          <div class="feature-item-icon">🗂️</div>
+          <div class="feature-item-text">
+            <div class="feature-item-title">Schema Browser</div>
+            <div class="feature-item-desc">Explore tables, columns, indexes, relations</div>
+          </div>
+        </div>
+        <div class="feature-item" data-feature="2">
+          <div class="feature-item-icon">📊</div>
+          <div class="feature-item-text">
+            <div class="feature-item-title">Data Grid</div>
+            <div class="feature-item-desc">View, filter, sort, and edit rows inline</div>
+          </div>
+        </div>
+        <div class="feature-item" data-feature="3">
+          <div class="feature-item-icon">🔗</div>
+          <div class="feature-item-text">
+            <div class="feature-item-title">Connection Manager</div>
+            <div class="feature-item-desc">Organize all your database connections</div>
+          </div>
+        </div>
+        <div class="feature-item" data-feature="4">
+          <div class="feature-item-icon">📤</div>
+          <div class="feature-item-text">
+            <div class="feature-item-title">Import &amp; Export</div>
+            <div class="feature-item-desc">CSV, JSON, SQL dump — one click away</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panels -->
+    <div class="features-panels" id="feature-panels">
+
+      <!-- Panel 0: Query Editor -->
+      <div class="feature-panel active" id="panel-0">
+        <div class="feature-panel-title">Smart Query Editor</div>
+        <div class="feature-panel-desc">Write queries faster with syntax highlighting, intelligent autocomplete, and multi-tab support. Run queries against any engine with the same familiar interface.</div>
+        <div class="carousel" id="carousel-0">
+          <div class="carousel-track">
+            <div class="carousel-slide">
+              <div class="mock">
+                <div class="mock-bar">
+                  <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+                </div>
+                <div class="mock-body">
+                  <div class="mock-editor">
+                    <span class="cm">-- Find top customers by revenue</span><br>
+                    <span class="kw">SELECT</span><br>
+                    &nbsp;&nbsp;c.id,<br>
+                    &nbsp;&nbsp;c.name,<br>
+                    &nbsp;&nbsp;<span class="fn">SUM</span>(o.total) <span class="kw">AS</span> revenue,<br>
+                    &nbsp;&nbsp;<span class="fn">COUNT</span>(*) <span class="kw">AS</span> orders<br>
+                    <span class="kw">FROM</span> customers c<br>
+                    <span class="kw">JOIN</span> orders o <span class="kw">ON</span> o.customer_id = c.id<br>
+                    <span class="kw">WHERE</span> o.status = <span class="str">'completed'</span><br>
+                    &nbsp;&nbsp;<span class="kw">AND</span> o.created_at &gt;= <span class="fn">NOW</span>() - <span class="kw">INTERVAL</span> <span class="str">'30 days'</span><br>
+                    <span class="kw">GROUP BY</span> c.id<br>
+                    <span class="kw">HAVING</span> revenue &gt; <span class="num">1000</span><br>
+                    <span class="kw">ORDER BY</span> revenue <span class="kw">DESC</span>;
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="carousel-slide">
+              <div class="mock">
+                <div class="mock-bar">
+                  <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+                </div>
+                <div class="mock-body" style="display:flex;flex-direction:column;gap:14px;">
+                  <div class="mock-editor">
+                    <span class="kw">CREATE TABLE</span> <span class="fn">analytics_events</span> (<br>
+                    &nbsp;&nbsp;id <span class="num">BIGSERIAL PRIMARY KEY</span>,<br>
+                    &nbsp;&nbsp;user_id <span class="num">INT</span> <span class="kw">REFERENCES</span> users(id),<br>
+                    &nbsp;&nbsp;event_type <span class="str">VARCHAR(80)</span> <span class="kw">NOT NULL</span>,<br>
+                    &nbsp;&nbsp;payload <span class="num">JSONB</span>,<br>
+                    &nbsp;&nbsp;created_at <span class="num">TIMESTAMPTZ</span> <span class="kw">DEFAULT</span> <span class="fn">NOW</span>()<br>
+                    );
+                  </div>
+                  <div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:10px 14px;font-size:0.78rem;color:#4ade80;font-family:'JetBrains Mono',monospace;">
+                    ✓ Query executed in 14ms · 0 rows affected
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="carousel-controls">
+            <button class="carousel-btn" onclick="carouselPrev(0)">‹</button>
+            <div class="carousel-dot active" onclick="carouselGoto(0,0)"></div>
+            <div class="carousel-dot" onclick="carouselGoto(0,1)"></div>
+            <button class="carousel-btn" onclick="carouselNext(0)">›</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 1: Schema Browser -->
+      <div class="feature-panel" id="panel-1">
+        <div class="feature-panel-title">Schema Browser</div>
+        <div class="feature-panel-desc">Visualize your entire database structure at a glance. Inspect columns, types, constraints, and foreign key relationships without writing a single query.</div>
+        <div class="carousel" id="carousel-1">
+          <div class="carousel-track">
+            <div class="carousel-slide">
+              <div class="mock">
+                <div class="mock-bar">
+                  <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+                </div>
+                <div class="mock-body">
+                  <div class="mock-schema">
+                    <div class="schema-table">
+                      <div class="schema-table-header">📋 users</div>
+                      <div class="schema-col"><span>id</span><span style="display:flex;gap:6px;align-items:center;"><span class="col-type">bigint</span><span class="col-pk">PK</span></span></div>
+                      <div class="schema-col"><span>email</span><span class="col-type">varchar(255)</span></div>
+                      <div class="schema-col"><span>name</span><span class="col-type">varchar(120)</span></div>
+                      <div class="schema-col"><span>created_at</span><span class="col-type">timestamptz</span></div>
+                      <div class="schema-col"><span>role_id</span><span style="display:flex;gap:6px;align-items:center;"><span class="col-type">int</span><span class="col-fk">FK</span></span></div>
+                    </div>
+                    <div class="schema-table">
+                      <div class="schema-table-header">📋 orders</div>
+                      <div class="schema-col"><span>id</span><span style="display:flex;gap:6px;align-items:center;"><span class="col-type">bigint</span><span class="col-pk">PK</span></span></div>
+                      <div class="schema-col"><span>user_id</span><span style="display:flex;gap:6px;align-items:center;"><span class="col-type">bigint</span><span class="col-fk">FK</span></span></div>
+                      <div class="schema-col"><span>total</span><span class="col-type">decimal(10,2)</span></div>
+                      <div class="schema-col"><span>status</span><span class="col-type">varchar(20)</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="carousel-controls">
+            <div class="carousel-dot active"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 2: Data Grid -->
+      <div class="feature-panel" id="panel-2">
+        <div class="feature-panel-title">Powerful Data Grid</div>
+        <div class="feature-panel-desc">Browse and edit table data with column sorting, filtering, and inline cell editing. Handles millions of rows without breaking a sweat.</div>
+        <div class="carousel" id="carousel-2">
+          <div class="carousel-track">
+            <div class="carousel-slide">
+              <div class="mock">
+                <div class="mock-bar">
+                  <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+                </div>
+                <div class="mock-body" style="padding:0;">
+                  <div class="mock-col-header" style="padding:10px 20px;border-bottom:1px solid var(--border);">
+                    <span>ID ↕</span><span>Name</span><span>Email</span><span>Orders ↓</span>
+                  </div>
+                  <div class="mock-data-row" style="padding:9px 20px;border-bottom:1px solid rgba(100,100,200,0.06);"><span style="color:var(--text3);font-family:monospace;font-size:0.72rem;">#1042</span><span>Alice Martins</span><span>alice@example.com</span><span style="color:#4ade80;font-weight:600;">87</span></div>
+                  <div class="mock-data-row" style="padding:9px 20px;border-bottom:1px solid rgba(100,100,200,0.06);background:rgba(124,106,247,0.05);border-left:2px solid var(--accent);"><span style="color:var(--text3);font-family:monospace;font-size:0.72rem;">#983</span><span>Bruno Costa</span><span>bruno@example.com</span><span style="color:#4ade80;font-weight:600;">64</span></div>
+                  <div class="mock-data-row" style="padding:9px 20px;border-bottom:1px solid rgba(100,100,200,0.06);"><span style="color:var(--text3);font-family:monospace;font-size:0.72rem;">#777</span><span>Carla Silva</span><span>carla@example.com</span><span>41</span></div>
+                  <div class="mock-data-row" style="padding:9px 20px;border-bottom:1px solid rgba(100,100,200,0.06);"><span style="color:var(--text3);font-family:monospace;font-size:0.72rem;">#512</span><span>Daniel Rocha</span><span>daniel@example.com</span><span>19</span></div>
+                  <div class="mock-data-row" style="padding:9px 20px;"><span style="color:var(--text3);font-family:monospace;font-size:0.72rem;">#401</span><span>Eva Souza</span><span>eva@example.com</span><span>8</span></div>
+                  <div style="padding:10px 20px;font-size:0.72rem;color:var(--text3);border-top:1px solid var(--border);display:flex;justify-content:space-between;">
+                    <span>Showing 1–50 of 12,483 rows</span>
+                    <span>← 1 2 3 … 250 →</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="carousel-controls"><div class="carousel-dot active"></div></div>
+        </div>
+      </div>
+
+      <!-- Panel 3: Connection Manager -->
+      <div class="feature-panel" id="panel-3">
+        <div class="feature-panel-title">Connection Manager</div>
+        <div class="feature-panel-desc">Keep all your database connections organized in one place. Switch between production, staging, and local environments instantly.</div>
+        <div class="carousel" id="carousel-3">
+          <div class="carousel-track">
+            <div class="carousel-slide">
+              <div class="mock">
+                <div class="mock-bar">
+                  <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+                </div>
+                <div class="mock-body">
+                  <div class="conn-list">
+                    <div class="conn-card">
+                      <div class="conn-dot online"></div>
+                      <div class="conn-info">
+                        <div class="conn-name">🐘 Production DB</div>
+                        <div class="conn-host">db.myapp.com:5432 · postgres</div>
+                      </div>
+                      <span class="conn-badge tag tag-green">Connected</span>
+                    </div>
+                    <div class="conn-card">
+                      <div class="conn-dot online"></div>
+                      <div class="conn-info">
+                        <div class="conn-name">🐬 Analytics MySQL</div>
+                        <div class="conn-host">analytics.internal:3306 · mysql</div>
+                      </div>
+                      <span class="conn-badge tag tag-green">Connected</span>
+                    </div>
+                    <div class="conn-card">
+                      <div class="conn-dot offline"></div>
+                      <div class="conn-info">
+                        <div class="conn-name">🍃 MongoDB Atlas</div>
+                        <div class="conn-host">cluster0.mongodb.net · mongo</div>
+                      </div>
+                      <span class="conn-badge tag tag-purple">Idle</span>
+                    </div>
+                    <div class="conn-card">
+                      <div class="conn-dot online"></div>
+                      <div class="conn-info">
+                        <div class="conn-name">⚡ Redis Cache</div>
+                        <div class="conn-host">localhost:6379 · redis</div>
+                      </div>
+                      <span class="conn-badge tag tag-blue">Local</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="carousel-controls"><div class="carousel-dot active"></div></div>
+        </div>
+      </div>
+
+      <!-- Panel 4: Import & Export -->
+      <div class="feature-panel" id="panel-4">
+        <div class="feature-panel-title">Import &amp; Export</div>
+        <div class="feature-panel-desc">Move data in and out effortlessly. Export to CSV, JSON, or SQL dump. Import from a file or paste data directly — NoctuaDB handles the rest.</div>
+        <div class="carousel" id="carousel-4">
+          <div class="carousel-track">
+            <div class="carousel-slide">
+              <div class="mock">
+                <div class="mock-bar">
+                  <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+                </div>
+                <div class="mock-body" style="display:flex;flex-direction:column;gap:14px;">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;text-align:center;">
+                      <div style="font-size:2rem;margin-bottom:8px;">📥</div>
+                      <div style="font-weight:700;margin-bottom:4px;font-size:0.85rem;">Import</div>
+                      <div style="font-size:0.72rem;color:var(--text3);">CSV · JSON · SQL</div>
+                    </div>
+                    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;text-align:center;">
+                      <div style="font-size:2rem;margin-bottom:8px;">📤</div>
+                      <div style="font-weight:700;margin-bottom:4px;font-size:0.85rem;">Export</div>
+                      <div style="font-size:0.72rem;color:var(--text3);">CSV · JSON · SQL Dump</div>
+                    </div>
+                  </div>
+                  <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;">
+                    <div style="font-size:0.78rem;color:var(--text3);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Export Progress</div>
+                    <div style="background:var(--bg2);border-radius:6px;height:8px;overflow:hidden;margin-bottom:8px;">
+                      <div style="background:linear-gradient(to right,var(--accent),var(--accent3));height:100%;width:74%;border-radius:6px;"></div>
+                    </div>
+                    <div style="font-size:0.72rem;color:var(--text2);font-family:'JetBrains Mono',monospace;">74% · 37,291 / 50,000 rows · ~3s remaining</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="carousel-controls"><div class="carousel-dot active"></div></div>
+        </div>
+      </div>
+
+    </div><!-- /features-panels -->
+  </div><!-- /features-layout -->
+</section>
+</div><!-- /features-zone -->
+
+<div class="divider"></div>
+
+<!-- DOWNLOAD -->
+<section id="download">
+  <div class="download-card">
+    <div class="section-label">Download</div>
+    <h2 class="download-title">Ready to dive in?</h2>
+    <p class="download-sub">Free to download. No account required. Works on all major platforms.</p>
+    <div class="download-grid">
+      <a href="https://github.com/iuribrito/noctuadb-studio/releases/latest" target="_blank" class="dl-btn">
+        <div class="dl-icon">🐧</div>
+        <div class="dl-os">Linux</div>
+        <div class="dl-note">.deb · .rpm · .AppImage</div>
+      </a>
+      <a href="https://github.com/iuribrito/noctuadb-studio/releases/latest" target="_blank" class="dl-btn">
+        <div class="dl-icon">🪟</div>
+        <div class="dl-os">Windows</div>
+        <div class="dl-note">.exe installer</div>
+      </a>
+      <a href="https://github.com/iuribrito/noctuadb-studio/releases/latest" target="_blank" class="dl-btn">
+        <div class="dl-icon">🍎</div>
+        <div class="dl-os">macOS</div>
+        <div class="dl-note">.dmg · Apple Silicon &amp; Intel</div>
+      </a>
+    </div>
+    <a href="https://github.com/iuribrito/noctuadb-studio/releases" target="_blank" class="dl-release-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg>
+      View all releases on GitHub
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#" class="nav-logo" style="margin-bottom:16px;display:inline-flex;">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+          <circle cx="16" cy="16" r="15" fill="rgba(124,106,247,0.15)" stroke="rgba(124,106,247,0.4)" stroke-width="1"/>
+          <ellipse cx="12" cy="15" rx="4" ry="4.5" fill="rgba(124,106,247,0.3)"/>
+          <ellipse cx="20" cy="15" rx="4" ry="4.5" fill="rgba(124,106,247,0.3)"/>
+          <circle cx="12" cy="15" r="2.5" fill="#a78bfa"/>
+          <circle cx="20" cy="15" r="2.5" fill="#a78bfa"/>
+          <circle cx="12.8" cy="14.2" r="0.9" fill="#fff"/>
+          <circle cx="20.8" cy="14.2" r="0.9" fill="#fff"/>
+          <path d="M14 21 Q16 23 18 21" stroke="#a78bfa" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+        </svg>
+        <span class="nav-logo-text" style="margin-left:10px;">Noctua<span>DB</span> Studio</span>
+      </a>
+      <p>A beautiful, fast database GUI that works with every engine you use. Open source and free forever for individuals.</p>
+      <div class="footer-socials">
+        <a href="https://github.com/iuribrito/noctuadb-studio" target="_blank" class="footer-social-btn" title="GitHub">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+        <a href="#" class="footer-social-btn" title="Twitter/X">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <ul>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#databases">Databases</a></li>
+        <li><a href="#download">Download</a></li>
+        <li><a href="https://github.com/iuribrito/noctuadb-studio/releases" target="_blank">Changelog</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Resources</h4>
+      <ul>
+        <li><a href="#">Documentation</a></li>
+        <li><a href="#">Quick Start</a></li>
+        <li><a href="#">Keyboard Shortcuts</a></li>
+        <li><a href="https://github.com/iuribrito/noctuadb-studio/issues" target="_blank">Report a Bug</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Project</h4>
+      <ul>
+        <li><a href="https://github.com/iuribrito/noctuadb-studio" target="_blank">GitHub</a></li>
+        <li><a href="https://github.com/iuribrito/noctuadb-studio/blob/main/LICENSE" target="_blank">License</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Use</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-bottom-left">
+      © 2026 <span>NoctuaDB Studio</span>. Open source under MIT License.
+    </div>
+    <div class="footer-bottom-right">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="https://github.com/iuribrito/noctuadb-studio" target="_blank">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── STARS ──────────────────────────────────────────────────
+const canvas = document.getElementById('stars-canvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+let W, H;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+
+function createStars(n) {
+  stars = [];
+  for (let i = 0; i < n; i++) {
+    stars.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.4 + 0.2,
+      alpha: Math.random() * 0.7 + 0.1,
+      speed: Math.random() * 0.3 + 0.05,
+      phase: Math.random() * Math.PI * 2,
+    });
+  }
+}
+
+function drawStars(t) {
+  ctx.clearRect(0, 0, W, H);
+  stars.forEach(s => {
+    const a = s.alpha * (0.6 + 0.4 * Math.sin(t * s.speed + s.phase));
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(200,210,255,${a})`;
+    ctx.fill();
+  });
+  // occasional bright stars with glow
+  stars.slice(0, 30).forEach(s => {
+    const a = 0.5 + 0.5 * Math.sin(t * s.speed * 0.5 + s.phase);
+    ctx.shadowBlur = 6;
+    ctx.shadowColor = 'rgba(167,139,250,0.8)';
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r * 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(220,210,255,${a * 0.9})`;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  });
+}
+
+let then = 0;
+function loop(now) {
+  requestAnimationFrame(loop);
+  const t = now / 1000;
+  if (now - then > 50) { // ~20fps for stars is enough
+    drawStars(t);
+    then = now;
+  }
+}
+
+resize();
+createStars(280);
+requestAnimationFrame(loop);
+window.addEventListener('resize', () => { resize(); createStars(280); });
+
+// ── FEATURE SCROLL ─────────────────────────────────────────
+const featureItems = document.querySelectorAll('.feature-item');
+const featurePanels = document.querySelectorAll('.feature-panel');
+const featuresZone = document.getElementById('features-zone');
+const numFeatures = featureItems.length;
+let currentFeature = 0;
+
+// Give the zone enough height so each feature gets ~80vh of scroll travel
+featuresZone.style.height = `calc(100vh + ${(numFeatures - 1)} * 80vh)`;
+
+function activateFeature(idx) {
+  if (idx === currentFeature) return;
+  currentFeature = idx;
+  featureItems.forEach((el, i) => el.classList.toggle('active', i === idx));
+  featurePanels.forEach((el, i) => el.classList.toggle('active', i === idx));
+}
+
+// Click on list item → scroll to its position in the zone
+featureItems.forEach((item, i) => {
+  item.addEventListener('click', () => {
+    const zoneTop = featuresZone.offsetTop;
+    const scrollable = featuresZone.offsetHeight - window.innerHeight;
+    const target = zoneTop + (i / numFeatures) * scrollable;
+    window.scrollTo({ top: target, behavior: 'smooth' });
+    activateFeature(i);
+  });
+});
+
+// Scroll-driven: map position inside the zone to feature index
+function onScroll() {
+  const zoneTop = featuresZone.offsetTop;
+  const scrollable = featuresZone.offsetHeight - window.innerHeight;
+  const scrollInZone = window.scrollY - zoneTop;
+
+  if (scrollInZone < 0 || scrollInZone > scrollable) return;
+
+  const progress = scrollInZone / scrollable;
+  const idx = Math.min(numFeatures - 1, Math.floor(progress * numFeatures));
+  activateFeature(idx);
+}
+
+window.addEventListener('scroll', onScroll, { passive: true });
+
+// ── CAROUSEL ───────────────────────────────────────────────
+const carousels = {};
+
+function getCarousel(id) {
+  if (!carousels[id]) {
+    const el = document.getElementById('carousel-' + id);
+    if (!el) return null;
+    const track = el.querySelector('.carousel-track');
+    const dots = el.querySelectorAll('.carousel-dot');
+    const slides = el.querySelectorAll('.carousel-slide');
+    carousels[id] = { el, track, dots, slides, idx: 0 };
+  }
+  return carousels[id];
+}
+
+function carouselGoto(id, idx) {
+  const c = getCarousel(id);
+  if (!c) return;
+  c.idx = Math.max(0, Math.min(c.slides.length - 1, idx));
+  c.track.style.transform = `translateX(-${c.idx * 100}%)`;
+  c.dots.forEach((d, i) => d.classList.toggle('active', i === c.idx));
+}
+
+function carouselNext(id) {
+  const c = getCarousel(id);
+  if (!c) return;
+  carouselGoto(id, (c.idx + 1) % c.slides.length);
+}
+
+function carouselPrev(id) {
+  const c = getCarousel(id);
+  if (!c) return;
+  carouselGoto(id, (c.idx - 1 + c.slides.length) % c.slides.length);
+}
+
+// Auto-init all carousels
+document.querySelectorAll('.carousel').forEach(el => {
+  const id = el.id.replace('carousel-', '');
+  getCarousel(id);
+});
+
+// ── NAV SCROLL EFFECT ──────────────────────────────────────
+const nav = document.querySelector('nav');
+window.addEventListener('scroll', () => {
+  nav.style.background = window.scrollY > 20
+    ? 'rgba(5,5,15,0.85)'
+    : 'rgba(5,5,15,0.6)';
+}, { passive: true });
+</script>
+</body>
+</html>
